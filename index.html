@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>데이터 기반 해외여행 가이드북 | 인터랙티브 프로젝트 대시보드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Neutrals with a Trustworthy Blue Accent -->
+    <!-- Application Structure Plan: A user-centric, dashboard-style SPA. The flow is designed as a persuasion funnel: 1. Hero section for immediate value proposition. 2. 'Why' section to establish the problem and our unique solution. 3. Interactive data exploration to prove the 'data-driven' claim. 4. Product deep-dive to show the tangible output. 5. Reward tiers for clear call-to-action. 6. KPI and Roadmap sections to build trust and confidence. This structure guides the user from interest to conversion by logically addressing potential questions and demonstrating value at each step, making it more effective than a simple linear report. -->
+    <!-- Visualization & Content Choices: 
+        - Key Stats (477 reviews, 10M visitors): Goal: Inform/Impress -> Method: Large stat cards -> Justification: Immediate credibility boost.
+        - Regional Data: Goal: Compare/Explore -> Method: Interactive Bar Chart (Chart.js) with continent filters -> Interaction: Buttons update chart and text blocks -> Justification: Allows users to actively engage with the core data, making the 'big data' concept tangible and personalized.
+        - E-book Contents: Goal: Organize/Inform -> Method: Tabbed interface -> Interaction: Click tabs to reveal content -> Justification: Organizes detailed product information compactly without overwhelming the user.
+        - Funding KPIs: Goal: Motivate/Inform -> Method: Doughnut Chart (Chart.js) for funding goal, stat cards for SNS goals -> Justification: Visually represents project momentum and marketing viability, fostering trust.
+        - Reward Tiers: Goal: Compare/Action -> Method: Grid of styled cards -> Justification: Facilitates easy comparison and decision-making for potential backers.
+        - Timeline: Goal: Build Trust -> Method: CSS-based visual timeline -> Justification: Clearly shows post-funding commitment, mitigating a common backer risk concern. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 40vh;
+            max-height: 450px;
+        }
+        .kpi-chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+        }
+        .nav-link {
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #1d4ed8;
+            transform: translateY(-2px);
+            border-bottom: 2px solid #1d4ed8;
+        }
+        .tab-button.active {
+            background-color: #1d4ed8;
+            color: white;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-blue-800">데이터 기반 여행 가이드북</h1>
+            <div class="hidden md:flex items-center space-x-8 text-lg">
+                <a href="#vision" class="nav-link pb-1">프로젝트 비전</a>
+                <a href="#data" class="nav-link pb-1">데이터 분석</a>
+                <a href="#product" class="nav-link pb-1">리워드 소개</a>
+                <a href="#rewards" class="nav-link pb-1">후원 옵션</a>
+                <a href="#kpi" class="nav-link pb-1">성공 전략</a>
+            </div>
+            <a href="#rewards" class="hidden md:block bg-blue-700 text-white font-bold py-2 px-6 rounded-full hover:bg-blue-800 transition-colors">
+                펀딩 참여하기
+            </a>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+
+        <section id="hero" class="text-center py-16">
+            <h2 class="text-5xl md:text-6xl font-black text-gray-800 leading-tight">
+                <span class="text-blue-700">데이터</span>가 증명하는<br>실패 없는 해외여행의 시작
+            </h2>
+            <p class="mt-6 text-xl text-gray-600 max-w-3xl mx-auto">
+                1,000만 방문자가 신뢰한 블로거의 13년 노하우와 477개의 실제 후기 데이터를 과학적으로 분석하여, 광고 없는 진짜 여행 정보의 새로운 기준을 제시합니다.
+            </p>
+            <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                    <div class="text-5xl font-extrabold text-blue-700">477<span class="text-3xl">개</span></div>
+                    <p class="mt-2 text-lg font-semibold text-gray-700">실제 후기 데이터</p>
+                    <p class="text-sm text-gray-500">광고 없는 순수 경험 분석</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                    <div class="text-5xl font-extrabold text-blue-700">1000<span class="text-3xl">만+</span></div>
+                    <p class="mt-2 text-lg font-semibold text-gray-700">누적 방문자</p>
+                    <p class="text-sm text-gray-500">13년간 검증된 신뢰성</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                    <div class="text-5xl font-extrabold text-blue-700">93<span class="text-3xl">만 자</span></div>
+                    <p class="mt-2 text-lg font-semibold text-gray-700">분석 텍스트</p>
+                    <p class="text-sm text-gray-500">빅데이터 기반 인사이트</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="vision" class="py-16">
+            <div class="text-center mb-12">
+                <h3 class="text-4xl font-bold">왜 '데이터 기반' 가이드북이 필요한가요?</h3>
+                <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">기존 여행 정보의 한계를 넘어, 객관적 데이터로 당신의 소중한 여행을 지켜드립니다.</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+                <div class="bg-red-50 border-2 border-red-200 p-8 rounded-2xl">
+                    <h4 class="text-2xl font-bold text-red-700">기존 여행 정보의 문제점 😥</h4>
+                    <ul class="mt-6 space-y-4 text-lg text-gray-700">
+                        <li class="flex items-start"><span class="mr-3 mt-1">❌</span><span>광고성 정보와 협찬으로 가득한 '맛집' 추천</span></li>
+                        <li class="flex items-start"><span class="mr-3 mt-1">❌</span><span>개인의 주관적 경험에만 의존하는 단편적 정보</span></li>
+                        <li class="flex items-start"><span class="mr-3 mt-1">❌</span><span>오래되어 현실과 맞지 않는 구식 데이터</span></li>
+                        <li class="flex items-start"><span class="mr-3 mt-1">❌</span><span>결정적인 순간에 도움이 안 되는 피상적인 내용</span></li>
+                    </ul>
+                </div>
+                <div class="bg-blue-50 border-2 border-blue-200 p-8 rounded-2xl">
+                    <h4 class="text-2xl font-bold text-blue-800">우리의 해결책: 데이터 기반 접근 ✨</h4>
+                    <ul class="mt-6 space-y-4 text-lg text-gray-700">
+                        <li class="flex items-start"><span class="mr-3 mt-1">✔️</span><span>477개 실제 후기 분석으로 검증된 정보 제공</span></li>
+                        <li class="flex items-start"><span class="mr-3 mt-1">✔️</span><span>'집단 지성'을 활용한 객관적, 과학적 인사이트</span></li>
+                        <li class="flex items-start"><span class="mr-3 mt-1">✔️</span><span>최신 5년 데이터로 가장 현실적인 트렌드 반영</span></li>
+                        <li class="flex items-start"><span class="mr-3 mt-1">✔️</span><span>'한국인 입맛'에 맞는 맛집 등 실용적 맞춤 정보</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="data" class="py-16 bg-white rounded-3xl shadow-xl border border-gray-200">
+            <div class="text-center mb-12 px-4">
+                <h3 class="text-4xl font-bold">데이터로 탐색하는 진짜 여행 트렌드</h3>
+                <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">이 섹션에서는 477개 리뷰의 핵심 데이터를 직접 탐색할 수 있습니다. 대륙별 필터를 클릭하여 각 지역의 리뷰 분포와 주요 인사이트를 확인해 보세요. 이 데이터가 어떻게 '실패 없는 여행'을 가능하게 하는지 보여줍니다.</p>
+                <div id="region-filters" class="mt-8 flex flex-wrap justify-center gap-3">
+                    <button data-region="all" class="filter-btn bg-blue-700 text-white font-semibold py-2 px-5 rounded-full transition-transform hover:scale-105">전체</button>
+                    <button data-region="europe" class="filter-btn bg-gray-200 text-gray-700 font-semibold py-2 px-5 rounded-full transition-transform hover:scale-105">유럽</button>
+                    <button data-region="north_america" class="filter-btn bg-gray-200 text-gray-700 font-semibold py-2 px-5 rounded-full transition-transform hover:scale-105">북미</button>
+                    <button data-region="se_asia" class="filter-btn bg-gray-200 text-gray-700 font-semibold py-2 px-5 rounded-full transition-transform hover:scale-105">동남아</button>
+                    <button data-region="japan" class="filter-btn bg-gray-200 text-gray-700 font-semibold py-2 px-5 rounded-full transition-transform hover:scale-105">일본</button>
+                </div>
+            </div>
+            <div class="grid lg:grid-cols-5 gap-8 items-center px-6">
+                <div class="lg:col-span-3">
+                    <div class="chart-container">
+                        <canvas id="reviewsByRegionChart"></canvas>
+                    </div>
+                </div>
+                <div id="data-insights" class="lg:col-span-2 bg-blue-50 p-8 rounded-2xl border border-blue-200 fade-in">
+                    <h4 id="insight-title" class="text-2xl font-bold text-blue-800 mb-4">전체 데이터 인사이트</h4>
+                    <p id="insight-text" class="text-lg text-gray-700 mb-6">총 477개의 후기는 전 세계 다양한 지역을 포괄하며, 특히 문화/예술 중심의 유럽 여행에 대한 깊이 있는 데이터가 풍부합니다.</p>
+                    <div class="border-t border-blue-200 pt-4">
+                        <h5 class="font-bold text-lg mb-2">데이터가 선정한 TOP 여행지:</h5>
+                        <ul id="insight-top-list" class="space-y-1 text-gray-600">
+                            <li>1. 파리 (긍정률 89%)</li>
+                            <li>2. 도쿄 (긍정률 93%)</li>
+                            <li>3. 로마 (긍정률 85%)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="product" class="py-16">
+            <div class="text-center mb-12">
+                <h3 class="text-4xl font-bold">무엇을 받게 되나요? (전자책 상세 구성)</h3>
+                <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">총 280페이지 분량의 PDF 전자책으로, 당신의 여행을 완벽하게 만들어 줄 5개의 파트로 구성되어 있습니다.</p>
+            </div>
+            <div class="max-w-5xl mx-auto bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
+                <div class="flex justify-center border-b border-gray-200 mb-6">
+                    <button class="tab-button active py-3 px-6 font-bold text-lg" data-tab="part1">PART 1: 유럽</button>
+                    <button class="tab-button py-3 px-6 font-bold text-lg" data-tab="part2">PART 2: 북미</button>
+                    <button class="tab-button py-3 px-6 font-bold text-lg" data-tab="part3">PART 3: 동남아</button>
+                    <button class="tab-button py-3 px-6 font-bold text-lg" data-tab="part4">PART 4: 일본</button>
+                    <button class="tab-button py-3 px-6 font-bold text-lg" data-tab="part5">PART 5: 꿀팁</button>
+                </div>
+                <div id="tab-content" class="fade-in">
+                    <!-- Content will be dynamically inserted here -->
+                </div>
+            </div>
+        </section>
+
+        <section id="rewards" class="py-16 bg-gray-100 rounded-3xl">
+            <div class="text-center mb-12">
+                <h3 class="text-4xl font-bold">당신을 위한 후원 옵션</h3>
+                <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">프로젝트의 가치를 믿는 서포터님들을 위해 5단계의 맞춤형 리워드를 준비했습니다.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+                <!-- Tier cards -->
+                <div class="bg-white rounded-2xl shadow-lg p-8 border-2 border-transparent hover:border-blue-500 transition-all transform hover:-translate-y-2 flex flex-col">
+                    <div class="flex-grow">
+                        <span class="text-blue-600 font-bold">Tier 1. 얼리버드</span>
+                        <h4 class="text-3xl font-extrabold my-2">9,900원</h4>
+                        <p class="text-gray-600 mb-6">가장 먼저 만나는 데이터 기반 여행의 시작</p>
+                        <ul class="space-y-3 text-gray-700">
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span>디지털 전자책 (PDF)</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span>감사 메시지</li>
+                        </ul>
+                    </div>
+                    <button class="mt-8 w-full bg-gray-800 text-white font-bold py-3 rounded-lg hover:bg-black transition-colors">이 리워드 선택</button>
+                </div>
+                 <div class="bg-white rounded-2xl shadow-lg p-8 border-2 border-blue-600 transform -translate-y-2 ring-4 ring-blue-200 flex flex-col">
+                    <div class="flex-grow">
+                        <span class="text-blue-600 font-bold">Tier 2. 스탠다드 ✨</span>
+                        <h4 class="text-3xl font-extrabold my-2">19,900원</h4>
+                        <p class="text-gray-600 mb-6">데이터의 힘을 직접 체험하는 실용주의자를 위해</p>
+                        <ul class="space-y-3 text-gray-700">
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span>Tier 1 모든 혜택</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span>원본 데이터 시트 (Excel)</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span>맞춤 여행 코스 추천</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span>실시간 정보 업데이트</li>
+                        </ul>
+                    </div>
+                    <button class="mt-8 w-full bg-blue-700 text-white font-bold py-3 rounded-lg hover:bg-blue-800 transition-colors">가장 인기있는 선택</button>
+                </div>
+                <div class="bg-white rounded-2xl shadow-lg p-8 border-2 border-transparent hover:border-blue-500 transition-all transform hover:-translate-y-2 flex flex-col">
+                    <div class="flex-grow">
+                        <span class="text-blue-600 font-bold">Tier 3. 프리미엄</span>
+                        <h4 class="text-3xl font-extrabold my-2">39,900원</h4>
+                        <p class="text-gray-600 mb-6">개인화된 경험과 소통을 원하는 당신</p>
+                        <ul class="space-y-3 text-gray-700">
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span>Tier 2 모든 혜택</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span>1:1 여행 컨설팅 (1시간)</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span>VIP 커뮤니티 초대</li>
+                        </ul>
+                    </div>
+                    <button class="mt-8 w-full bg-gray-800 text-white font-bold py-3 rounded-lg hover:bg-black transition-colors">이 리워드 선택</button>
+                </div>
+            </div>
+             <p class="text-center mt-8 text-gray-600">※ Tier 4(VIP), Tier 5(얼티밋) 등 더 높은 가치의 리워드는 펀딩 페이지에서 확인 가능합니다.</p>
+        </section>
+
+        <section id="kpi" class="py-16">
+            <div class="text-center mb-12">
+                <h3 class="text-4xl font-bold">성공을 위한 치밀한 전략</h3>
+                <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">우리는 감에 의존하지 않습니다. 펀딩의 모든 과정을 데이터 기반 KPI로 관리하고, 성공을 확신합니다.</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 items-center max-w-6xl mx-auto">
+                <div class="kpi-chart-container lg:col-span-1">
+                    <canvas id="fundingGoalChart"></canvas>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
+                         <span class="text-4xl font-black text-blue-800">300%</span>
+                         <span class="font-bold text-gray-600">최종 목표</span>
+                    </div>
+                </div>
+                <div class="lg:col-span-2 grid grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                        <p class="text-lg font-semibold text-gray-700">텀블벅 사전 알림</p>
+                        <p class="text-4xl font-extrabold text-blue-700 mt-2">3,000<span class="text-2xl">명</span></p>
+                        <p class="text-sm text-gray-500">초기 흥행을 위한 핵심 지표</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                        <p class="text-lg font-semibold text-gray-700">인스타그램 팔로워</p>
+                        <p class="text-4xl font-extrabold text-blue-700 mt-2">+5,000<span class="text-2xl">명</span></p>
+                        <p class="text-sm text-gray-500">타겟 고객 직접 소통 채널</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                        <p class="text-lg font-semibold text-gray-700">릴스 평균 조회수</p>
+                        <p class="text-4xl font-extrabold text-blue-700 mt-2">50K<span class="text-2xl">+</span></p>
+                        <p class="text-sm text-gray-500">콘텐츠 바이럴 확산 목표</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                        <p class="text-lg font-semibold text-gray-700">바이럴 지수</p>
+                        <p class="text-4xl font-extrabold text-blue-700 mt-2">1.5<span class="text-2xl">+</span></p>
+                        <p class="text-sm text-gray-500">서포터 자발적 공유 목표</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white">
+        <div class="container mx-auto px-6 py-8 text-center">
+            <p class="text-2xl font-bold">데이터 기반 해외여행 가이드북</p>
+            <p class="mt-2 text-gray-400">당신의 여행이 최고의 경험이 될 때까지, 데이터는 멈추지 않습니다.</p>
+            <div class="mt-6">
+                <a href="#rewards" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 transition-colors text-lg">
+                    지금 바로 후원하고 최고의 혜택 받기
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const projectData = {
+            all: {
+                title: '전체 데이터 인사이트',
+                text: '총 477개의 후기는 전 세계 다양한 지역을 포괄하며, 특히 문화/예술 중심의 유럽 여행에 대한 깊이 있는 데이터가 풍부합니다.',
+                topList: ['1. 파리 (긍정률 89%)', '2. 도쿄 (긍정률 93%)', '3. 로마 (긍정률 85%)'],
+                chart: {
+                    labels: ['유럽', '북미', '동남아', '일본', '중화권', '오세아니아'],
+                    data: [242, 126, 121, 87, 45, 36]
+                }
+            },
+            europe: {
+                title: '유럽 (후기 242개)',
+                text: '문화, 예술, 역사 중심의 고단가 장거리 여행지로 데이터 비중이 가장 높습니다. 데이터 분석을 통해 숨겨진 명소와 최적의 동선을 제안합니다.',
+                topList: ['1. 파리 (84회)', '2. 로마 (65회)', '3. 런던 (58회)'],
+                chart: {
+                    labels: ['프랑스', '이탈리아', '영국', '스페인', '스위스', '기타'],
+                    data: [84, 65, 58, 45, 33, 57]
+                }
+            },
+            north_america: {
+                title: '북미 (후기 126개)',
+                text: '도시, 대자연, 테마파크 등 다채로운 경험이 가능한 여행지입니다. 국립공원 방문 팁과 도시별 맛집 데이터를 집중 분석했습니다.',
+                topList: ['1. 뉴욕 (45회)', '2. LA (31회)', '3. 캐나다 록키 (22회)'],
+                chart: {
+                    labels: ['뉴욕', '캘리포니아', '캐나다', '라스베가스', '기타'],
+                    data: [45, 38, 22, 15, 6]
+                }
+            },
+            se_asia: {
+                title: '동남아 (후기 121개)',
+                text: '휴양, 맛집, 가성비를 중시하는 한국인 인기 여행지입니다. 리조트 선택 기준과 실패 없는 로컬 맛집 정보를 제공합니다.',
+                topList: ['1. 방콕 (38회)', '2. 다낭 (32회)', '3. 발리 (25회)'],
+                chart: {
+                    labels: ['태국', '베트남', '인도네시아', '필리핀', '기타'],
+                    data: [42, 35, 25, 12, 7]
+                }
+            },
+            japan: {
+                title: '일본 (후기 87개)',
+                text: '문화체험, 쇼핑, 미식 여행의 천국. JR패스 활용법, 지역별 온천 비교 등 깊이 있는 여행을 위한 정보를 담았습니다.',
+                topList: ['1. 도쿄 (35회)', '2. 오사카 (28회)', '3. 후쿠오카 (15회)'],
+                chart: {
+                    labels: ['도쿄', '오사카/교토', '후쿠오카', '홋카이도', '기타'],
+                    data: [35, 28, 15, 5, 4]
+                }
+            }
+        };
+
+        const ebookContent = {
+            part1: {
+                title: "PART 1: 유럽 완전정복 (90p)",
+                description: "문화/예술/역사 중심의 고단가 장거리 여행지, 데이터 비중 최대 (242개 후기). 파리 3박 4일 완벽 코스, 로마 숨은 명소 BEST 10 등 실용 정보 수록.",
+                icon: "🏛️"
+            },
+            part2: {
+                title: "PART 2: 북미 드림 여행 (70p)",
+                description: "도시/자연/테마파크 중심의 다양한 경험 제공. 뉴욕 맛집 지도, 그랜드캐년 최적 방문 시기 등 데이터 기반 팁 포함.",
+                icon: "🗽"
+            },
+            part3: {
+                title: "PART 3: 동남아 힐링 여행 (60p)",
+                description: "휴양/맛집/가성비 중심, 한국인이 선호하는 단거리 여행지. 방콕 가성비 호텔 TOP 5, 다낭 리조트 솔직 비교 분석.",
+                icon: "🏝️"
+            },
+            part4: {
+                title: "PART 4: 일본 깊이 여행 (40p)",
+                description: "문화체험/쇼핑/음식 중심, 데이터 비중 대비 상세 구성. JR패스 완전정복, 도쿄 쇼핑 리스트 등 상세 정보.",
+                icon: "🍣"
+            },
+            part5: {
+                title: "PART 5: 해외여행 완전정복 꿀팁 (20p)",
+                description: "여행 준비 및 실용적인 정보 제공. 항공권 저렴하게 구하는 법, 여행자 보험 비교, 즉시 활용 가능한 체크리스트 포함.",
+                icon: "✈️"
+            }
+        };
+
+        let reviewsChart;
+        let fundingChart;
+
+        function updateDataInsights(region) {
+            const insightTitle = document.getElementById('insight-title');
+            const insightText = document.getElementById('insight-text');
+            const insightTopList = document.getElementById('insight-top-list');
+            const dataInsightsContainer = document.getElementById('data-insights');
+
+            const data = projectData[region];
+
+            dataInsightsContainer.classList.remove('fade-in');
+            void dataInsightsContainer.offsetWidth; 
+            dataInsightsContainer.classList.add('fade-in');
+
+            insightTitle.textContent = data.title;
+            insightText.textContent = data.text;
+            insightTopList.innerHTML = data.topList.map(item => `<li>${item}</li>`).join('');
+        }
+
+        function updateChart(region) {
+            const data = projectData[region].chart;
+            reviewsChart.data.labels = data.labels;
+            reviewsChart.data.datasets[0].data = data.data;
+            reviewsChart.update();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const ctxReviews = document.getElementById('reviewsByRegionChart').getContext('2d');
+            reviewsChart = new Chart(ctxReviews, {
+                type: 'bar',
+                data: {
+                    labels: projectData.all.chart.labels,
+                    datasets: [{
+                        label: '후기 수',
+                        data: projectData.all.chart.data,
+                        backgroundColor: 'rgba(37, 99, 235, 0.8)',
+                        borderColor: 'rgba(29, 78, 216, 1)',
+                        borderWidth: 1,
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.raw}개 후기`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            const ctxFunding = document.getElementById('fundingGoalChart').getContext('2d');
+            fundingChart = new Chart(ctxFunding, {
+                type: 'doughnut',
+                data: {
+                    labels: ['달성률', '미달성'],
+                    datasets: [{
+                        data: [150, 150],
+                        backgroundColor: ['#2563eb', '#e5e7eb'],
+                        borderWidth: 0,
+                        cutout: '75%'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            enabled: true,
+                             callbacks: {
+                                label: function(context) {
+                                    if(context.label === '달성률')
+                                        return `현재 달성률: 150% (보수적 시나리오)`;
+                                    return `목표까지: 150%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const region = button.dataset.region;
+                    
+                    filterButtons.forEach(btn => {
+                        btn.classList.remove('bg-blue-700', 'text-white');
+                        btn.classList.add('bg-gray-200', 'text-gray-700');
+                    });
+                    
+                    button.classList.add('bg-blue-700', 'text-white');
+                    button.classList.remove('bg-gray-200', 'text-gray-700');
+
+                    updateDataInsights(region);
+                    updateChart(region);
+                });
+            });
+            
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContentContainer = document.getElementById('tab-content');
+
+            function updateTabContent(tabId) {
+                const content = ebookContent[tabId];
+                tabContentContainer.innerHTML = `
+                    <div class="flex flex-col md:flex-row items-center gap-8">
+                        <div class="text-6xl">${content.icon}</div>
+                        <div>
+                            <h4 class="text-3xl font-bold text-gray-800">${content.title}</h4>
+                            <p class="mt-2 text-lg text-gray-600">${content.description}</p>
+                        </div>
+                    </div>
+                `;
+                tabContentContainer.classList.remove('fade-in');
+                void tabContentContainer.offsetWidth;
+                tabContentContainer.classList.add('fade-in');
+            }
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    updateTabContent(button.dataset.tab);
+                });
+            });
+
+            updateTabContent('part1');
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main section');
+
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 100) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
